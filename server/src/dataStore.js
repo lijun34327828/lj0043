@@ -1,0 +1,223 @@
+const fs = require('fs');
+const path = require('path');
+
+const DATA_DIR = path.join(__dirname, '../data');
+const DATA_FILE = path.join(DATA_DIR, 'data.json');
+
+function ensureDataDir() {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+}
+
+function loadData() {
+  ensureDataDir();
+  if (!fs.existsSync(DATA_FILE)) {
+    const initialData = getInitialData();
+    saveData(initialData);
+    return initialData;
+  }
+  try {
+    const content = fs.readFileSync(DATA_FILE, 'utf-8');
+    return JSON.parse(content);
+  } catch (e) {
+    console.error('数据加载失败，使用初始数据', e.message);
+    return getInitialData();
+  }
+}
+
+function saveData(data) {
+  ensureDataDir();
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
+}
+
+function getInitialData() {
+  const now = Date.now();
+  const oneDay = 24 * 60 * 60 * 1000;
+  const sevenDays = 7 * oneDay;
+  const thirtyDays = 30 * oneDay;
+
+  return {
+    activities: [
+      {
+        id: 'act-001',
+        name: '新人专享福利',
+        description: '新用户注册即享超值优惠券包',
+        status: 'active',
+        startTime: now - oneDay,
+        endTime: now + thirtyDays,
+        bannerColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        couponIds: ['cpn-001', 'cpn-002'],
+        claimLimit: 1,
+        createdAt: now
+      },
+      {
+        id: 'act-002',
+        name: '618年中大促',
+        description: '限时钜惠，满减券疯狂送',
+        status: 'active',
+        startTime: now - 3 * oneDay,
+        endTime: now + sevenDays,
+        bannerColor: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        couponIds: ['cpn-003', 'cpn-004'],
+        claimLimit: 1,
+        createdAt: now
+      },
+      {
+        id: 'act-003',
+        name: '会员回馈日',
+        description: '老会员专属福利，感恩回馈',
+        status: 'inactive',
+        startTime: now + tenDays(),
+        endTime: now + tenDays() + threeDays(),
+        bannerColor: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+        couponIds: ['cpn-005'],
+        claimLimit: 1,
+        createdAt: now
+      }
+    ],
+    coupons: [
+      {
+        id: 'cpn-001',
+        name: '新人专享券',
+        type: 'discount',
+        value: 50,
+        threshold: 200,
+        unit: '元',
+        totalCount: 10000,
+        claimedCount: 1234,
+        usedCount: 567,
+        expireDays: 30,
+        description: '新用户首单满200减50',
+        style: {
+          bgColor: '#ff6b6b',
+          textColor: '#ffffff',
+          borderColor: '#ee5a5a'
+        }
+      },
+      {
+        id: 'cpn-002',
+        name: '免邮券',
+        type: 'shipping',
+        value: 0,
+        threshold: 0,
+        unit: '张',
+        totalCount: 10000,
+        claimedCount: 987,
+        usedCount: 432,
+        expireDays: 30,
+        description: '全场通用免邮券',
+        style: {
+          bgColor: '#4ecdc4',
+          textColor: '#ffffff',
+          borderColor: '#3dbdb5'
+        }
+      },
+      {
+        id: 'cpn-003',
+        name: '618满减券',
+        type: 'discount',
+        value: 100,
+        threshold: 500,
+        unit: '元',
+        totalCount: 5000,
+        claimedCount: 3456,
+        usedCount: 1890,
+        expireDays: 7,
+        description: '618专属满500减100',
+        style: {
+          bgColor: '#f093fb',
+          textColor: '#ffffff',
+          borderColor: '#e083eb'
+        }
+      },
+      {
+        id: 'cpn-004',
+        name: '618大额券',
+        type: 'discount',
+        value: 200,
+        threshold: 1000,
+        unit: '元',
+        totalCount: 2000,
+        claimedCount: 876,
+        usedCount: 345,
+        expireDays: 7,
+        description: '618专属满1000减200',
+        style: {
+          bgColor: '#f5576c',
+          textColor: '#ffffff',
+          borderColor: '#e4465b'
+        }
+      },
+      {
+        id: 'cpn-005',
+        name: '会员专属券',
+        type: 'discount',
+        value: 30,
+        threshold: 100,
+        unit: '元',
+        totalCount: 3000,
+        claimedCount: 0,
+        usedCount: 0,
+        expireDays: 15,
+        description: '会员专享满100减30',
+        style: {
+          bgColor: '#667eea',
+          textColor: '#ffffff',
+          borderColor: '#556dd9'
+        }
+      }
+    ],
+    userCoupons: [
+      {
+        id: 'uc-001',
+        userId: 'user-001',
+        couponId: 'cpn-001',
+        activityId: 'act-001',
+        status: 'unused',
+        claimedAt: now - 2 * oneDay,
+        expireAt: now + 28 * oneDay,
+        usedAt: null
+      },
+      {
+        id: 'uc-002',
+        userId: 'user-001',
+        couponId: 'cpn-002',
+        activityId: 'act-001',
+        status: 'used',
+        claimedAt: now - 5 * oneDay,
+        expireAt: now + 25 * oneDay,
+        usedAt: now - oneDay
+      },
+      {
+        id: 'uc-003',
+        userId: 'user-001',
+        couponId: 'cpn-003',
+        activityId: 'act-002',
+        status: 'expired',
+        claimedAt: now - 10 * oneDay,
+        expireAt: now - 3 * oneDay,
+        usedAt: null
+      }
+    ],
+    claimRecords: [],
+    stats: {
+      totalClaims: 0,
+      totalUsed: 0,
+      claimRateData: []
+    }
+  };
+}
+
+function tenDays() {
+  return 10 * 24 * 60 * 60 * 1000;
+}
+
+function threeDays() {
+  return 3 * 24 * 60 * 60 * 1000;
+}
+
+module.exports = {
+  loadData,
+  saveData
+};
