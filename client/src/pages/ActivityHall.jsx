@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { activityApi } from '../services/api.js';
 import CouponCard from '../components/CouponCard.jsx';
 
@@ -8,10 +8,41 @@ function ActivityHall() {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [claimingId, setClaimingId] = useState(null);
-  const [message, setMessage] = useState(null);
+  const toastRef = useRef(null);
+  const toastTimeoutRef = useRef(null);
 
   useEffect(() => {
     loadActivities();
+    const toastEl = document.createElement('div');
+    toastEl.className = 'toast';
+    toastEl.style.cssText = `
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 2147483647;
+      padding: 14px 28px;
+      border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+      font-size: 15px;
+      font-weight: 600;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(40px);
+      transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+    `;
+    document.body.appendChild(toastEl);
+    toastRef.current = toastEl;
+
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+      if (toastRef.current) {
+        document.body.removeChild(toastRef.current);
+      }
+    };
   }, []);
 
   const loadActivities = async () => {
@@ -28,21 +59,52 @@ function ActivityHall() {
     }
   };
 
+  const showToast = (type, text) => {
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+    const toastEl = toastRef.current;
+    if (!toastEl) return;
+
+    const bgColor = type === 'success' ? '#f6ffed' : '#fff1f0';
+    const textColor = type === 'success' ? '#52c41a' : '#ff4d4f';
+    const borderColor = type === 'success' ? '#b7eb8f' : '#ffa39e';
+    const icon = type === 'success' ? '✅' : '❌';
+
+    toastEl.style.background = bgColor;
+    toastEl.style.color = textColor;
+    toastEl.style.border = `1px solid ${borderColor}`;
+    toastEl.textContent = `${icon} ${text}`;
+    toastEl.className = `toast toast-${type}`;
+    toastEl.style.animation = 'none';
+    requestAnimationFrame(() => {
+      toastEl.style.opacity = '1';
+      toastEl.style.visibility = 'visible';
+      toastEl.style.transform = 'translateX(0)';
+    });
+
+    toastTimeoutRef.current = setTimeout(() => {
+      toastEl.style.opacity = '0';
+      toastEl.style.visibility = 'hidden';
+      toastEl.style.transform = 'translateX(40px)';
+      toastEl.style.animation = 'none';
+    }, 3000);
+  };
+
   const handleClaim = async (activityId) => {
     try {
       setClaimingId(activityId);
       const result = await activityApi.claimActivity(activityId, USER_ID);
       if (result.code === 0) {
-        setMessage({ type: 'success', text: `成功领取 ${result.data.length} 张优惠券！` });
+        showToast('success', `成功领取 ${result.data.length} 张优惠券！`);
         loadActivities();
       } else {
-        setMessage({ type: 'error', text: result.message });
+        showToast('error', result.message);
       }
     } catch (error) {
-      setMessage({ type: 'error', text: '领取失败，请重试' });
+      showToast('error', '领取失败，请重试');
     } finally {
       setClaimingId(null);
-      setTimeout(() => setMessage(null), 3000);
     }
   };
 
@@ -71,19 +133,6 @@ function ActivityHall() {
     <div className="activity-hall">
       <h1 className="page-title">活动专区</h1>
       <p className="page-desc">精选限时活动，超值优惠券等你来领</p>
-
-      {message && (
-        <div className={`message message-${message.type}`} style={{
-          padding: '12px 16px',
-          borderRadius: '6px',
-          marginBottom: '20px',
-          background: message.type === 'success' ? '#f6ffed' : '#fff1f0',
-          color: message.type === 'success' ? '#52c41a' : '#ff4d4f',
-          border: `1px solid ${message.type === 'success' ? '#b7eb8f' : '#ffa39e'}`
-        }}>
-          {message.text}
-        </div>
-      )}
 
       <div className="activity-list">
         {activities.filter(a => a.status === 'active').map(activity => (

@@ -43,6 +43,20 @@
       ],
       "claimLimit": 1,
       "createdAt": 1781456668579
+    },
+    {
+      "id": "9059d7c7-58fd-49d9-aa8f-a9950e831d5b",
+      "name": "12212",
+      "description": "212",
+      "status": "inactive",
+      "startTime": 1781491620000,
+      "endTime": 1782528420000,
+      "bannerColor": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      "couponIds": [
+        "f9c56738-421d-4a7e-9868-5107478c86da"
+      ],
+      "claimLimit": 13,
+      "createdAt": 1781491650242
     }
   ],
   "coupons": [
@@ -134,6 +148,42 @@
         "bgColor": "#667eea",
         "textColor": "#ffffff",
         "borderColor": "#556dd9"
+      }
+    },
+    {
+      "id": "f9c56738-421d-4a7e-9868-5107478c86da",
+      "name": "新优惠券",
+      "type": "discount",
+      "value": 10,
+      "threshold": 0,
+      "unit": "元",
+      "totalCount": 1000,
+      "claimedCount": 0,
+      "usedCount": 0,
+      "expireDays": 30,
+      "description": "",
+      "style": {
+        "bgColor": "#ff6b6b",
+        "textColor": "#ffffff",
+        "borderColor": "#ee5a5a"
+      }
+    },
+    {
+      "id": "858aa5f9-b64b-4c73-81af-68c0f9e3bc46",
+      "name": "22222",
+      "type": "discount",
+      "value": 10333333,
+      "threshold": 0,
+      "unit": "元",
+      "totalCount": 1000,
+      "claimedCount": 0,
+      "usedCount": 0,
+      "expireDays": 30,
+      "description": "",
+      "style": {
+        "bgColor": "#ff6b6b",
+        "textColor": "#ffffff",
+        "borderColor": "#ee5a5a"
       }
     }
   ],
